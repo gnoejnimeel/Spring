@@ -1,10 +1,8 @@
-package com.spring.study.validation;
+package com.spring.study.validation.v1;
 
-import com.spring.study.mvc.domain.item.Item;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
-import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 @Component

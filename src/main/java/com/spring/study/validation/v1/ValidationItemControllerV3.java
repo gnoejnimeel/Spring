@@ -1,20 +1,22 @@
-package com.spring.study.validation;
+package com.spring.study.validation.v1;
 
+import com.spring.study.validation.item.SaveCehck;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+@Slf4j
 @Controller
-@RequestMapping("/validation/v1/items")
+@RequestMapping("/validation/v3/items")
 @RequiredArgsConstructor
-public class ValidationItemControllerV1 {
+public class ValidationItemControllerV3 {
 
     private final ValidationItemRepository itemRepository;
 
@@ -22,68 +24,56 @@ public class ValidationItemControllerV1 {
     public String items(Model model) {
         List<ValidationItem> items = itemRepository.findAll();
         model.addAttribute("items", items);
-        return "validation/v1/items";
+        return "validation/v3/items";
     }
 
     @GetMapping("/{itemId}")
     public String item(@PathVariable long itemId, Model model) {
         ValidationItem item = itemRepository.findById(itemId);
         model.addAttribute("item", item);
-        return "validation/v1/item";
+        return "validation/v3/item";
     }
 
     @GetMapping("/add")
     public String addForm(Model model) {
         model.addAttribute("item", new ValidationItem());
-        return "validation/v1/addForm";
+        return "validation/v3/addForm";
     }
 
-    @PostMapping("/add")
-    public String addItem(@ModelAttribute ValidationItem item, RedirectAttributes redirectAttributes, Model model) {
-        //검증 오류 결과 보관
-        Map<String, String> errors = new HashMap<>();
 
-        //검증 로직
-        if(!StringUtils.hasText(item.getItemName())) {
-            errors.put("itemName", "상품 이름은 필수입니다.");
-        }
-        if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
-            errors.put("price", "가격은 1,000 ~ 1,000,000 까지 허용합니다.");
-        }
-        if (item.getQuantity() == null || item.getQuantity() > 9999) {
-            errors.put("quantity", "수량은 최대 9,999 까지 허용합니다.");
-        }
+    @PostMapping("/add")
+    public String addItemV6(@Validated(SaveCehck.class) @ModelAttribute ValidationItem item, BindingResult bindingResult, RedirectAttributes redirectAttributes, Model model) {
+        //특정 필드 예외가 아닌 전체 예외
         if (item.getPrice() != null && item.getQuantity() != null) {
             int resultPrice = item.getPrice() * item.getQuantity();
             if (resultPrice < 10000) {
-                errors.put("globalError", "가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = " + resultPrice);
+                bindingResult.reject("totalPriceMin", new Object[]{10000, resultPrice}, null);
             }
         }
 
-        //검증 실패
-        if (!errors.isEmpty()) {
-            model.addAttribute("errors", errors);
-            return "validation/v1/addForm";
+        //검증에 실패하면 다시 입력 폼으로
+        if (bindingResult.hasErrors()) {
+            return "validation/v3/addForm";
         }
 
-        //검증 성공
+        //성공 로직
         ValidationItem savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId", savedItem.getId());
         redirectAttributes.addAttribute("status", true);
-        return "redirect:/validation/v1/items/{itemId}";
+        return "redirect:/validation/v3/items/{itemId}";
     }
 
     @GetMapping("/{itemId}/edit")
     public String editForm(@PathVariable Long itemId, Model model) {
         ValidationItem item = itemRepository.findById(itemId);
         model.addAttribute("item", item);
-        return "validation/v1/editForm";
+        return "validation/v3/editForm";
     }
 
     @PostMapping("/{itemId}/edit")
-    public String edit(@PathVariable Long itemId, @ModelAttribute ValidationItem item) {
+    public String edit(@PathVariable Long itemId, @Validated @ModelAttribute ValidationItem item) {
         itemRepository.update(itemId, item);
-        return "redirect:/validation/v1/items/{itemId}";
+        return "redirect:/validation/v3/items/{itemId}";
     }
 
 }

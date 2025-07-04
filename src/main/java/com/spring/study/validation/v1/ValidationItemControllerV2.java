@@ -1,4 +1,4 @@
-package com.spring.study.validation;
+package com.spring.study.validation.v1;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
-import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +19,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/validation/v2/items")
 @RequiredArgsConstructor
-public class ValidationItemControllerV3 {
+public class ValidationItemControllerV2 {
 
     private final ValidationItemRepository itemRepository;
 
@@ -36,20 +35,20 @@ public class ValidationItemControllerV3 {
     public String items(Model model) {
         List<ValidationItem> items = itemRepository.findAll();
         model.addAttribute("items", items);
-        return "validation/v3/items";
+        return "validation/v2/items";
     }
 
     @GetMapping("/{itemId}")
     public String item(@PathVariable long itemId, Model model) {
         ValidationItem item = itemRepository.findById(itemId);
         model.addAttribute("item", item);
-        return "validation/v3/item";
+        return "validation/v2/item";
     }
 
     @GetMapping("/add")
     public String addForm(Model model) {
         model.addAttribute("item", new ValidationItem());
-        return "validation/v3/addForm";
+        return "validation/v2/addForm";
     }
 
 //    @PostMapping("/add")
@@ -69,14 +68,14 @@ public class ValidationItemControllerV3 {
         }
 
         if(bindingResult.hasErrors()) {
-            return "validation/v3/addForm";
+            return "validation/v2/addForm";
         }
 
         //검증 성공
         ValidationItem savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId", savedItem.getId());
         redirectAttributes.addAttribute("status", true);
-        return "redirect:/validation/v3/items/{itemId}";
+        return "redirect:/validation/v2/items/{itemId}";
     }
 
 //    @PostMapping("/add")
@@ -96,24 +95,24 @@ public class ValidationItemControllerV3 {
         }
 
         if(bindingResult.hasErrors()) {
-            return "validation/v3/addForm";
+            return "validation/v2/addForm";
         }
 
         //검증 성공
         ValidationItem savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId", savedItem.getId());
         redirectAttributes.addAttribute("status", true);
-        return "redirect:/validation/v3/items/{itemId}";
+        return "redirect:/validation/v2/items/{itemId}";
     }
 
     @PostMapping("/add")
     public String addItemV3(@ModelAttribute ValidationItem item, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         //필드 오류
-        ValidationUtils.rejectIfEmptyOrWhitespace(bindingResult, "itemName", "required");
-//        if(!StringUtils.hasText(item.getItemName())) {
-//            //오브젝트 이름, 필드이름, 오류 메시지
-//            bindingResult.rejectValue("itemName", "required");
-//        }
+        if(!StringUtils.hasText(item.getItemName())) {
+            //오브젝트 이름, 필드이름, 오류 메시지
+            bindingResult.rejectValue("itemName", "required");
+        }
+
         //특정 필드 예외가 아닌 전체 예외
         if (item.getPrice() != null && item.getQuantity() != null) {
             int resultPrice = item.getPrice() * item.getQuantity();
@@ -124,14 +123,14 @@ public class ValidationItemControllerV3 {
         }
 
         if(bindingResult.hasErrors()) {
-            return "validation/v3/addForm";
+            return "validation/v2/addForm";
         }
 
         //검증 성공
         ValidationItem savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId", savedItem.getId());
         redirectAttributes.addAttribute("status", true);
-        return "redirect:/validation/v3/items/{itemId}";
+        return "redirect:/validation/v2/items/{itemId}";
     }
 
     //    @PostMapping("/add")
@@ -156,14 +155,14 @@ public class ValidationItemControllerV3 {
 
         //검증에 실패하면 다시 입력 폼으로
         if (bindingResult.hasErrors()) {
-            return "validation/v3/addForm";
+            return "validation/v2/addForm";
         }
 
         //성공 로직
         ValidationItem savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId", savedItem.getId());
         redirectAttributes.addAttribute("status", true);
-        return "redirect:/validation/v3/items/{itemId}";
+        return "redirect:/validation/v2/items/{itemId}";
     }
 
     //    @PostMapping("/add")
@@ -173,14 +172,14 @@ public class ValidationItemControllerV3 {
 
         //검증에 실패하면 다시 입력 폼으로
         if (bindingResult.hasErrors()) {
-            return "validation/v3/addForm";
+            return "validation/v2/addForm";
         }
 
         //성공 로직
         ValidationItem savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId", savedItem.getId());
         redirectAttributes.addAttribute("status", true);
-        return "redirect:/validation/v3/items/{itemId}";
+        return "redirect:/validation/v2/items/{itemId}";
     }
 
     //    @PostMapping("/add")
@@ -189,27 +188,27 @@ public class ValidationItemControllerV3 {
 
         //검증에 실패하면 다시 입력 폼으로
         if (bindingResult.hasErrors()) {
-            return "validation/v3/addForm";
+            return "validation/v2/addForm";
         }
 
         //성공 로직
         ValidationItem savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId", savedItem.getId());
         redirectAttributes.addAttribute("status", true);
-        return "redirect:/validation/v3/items/{itemId}";
+        return "redirect:/validation/v2/items/{itemId}";
     }
 
     @GetMapping("/{itemId}/edit")
     public String editForm(@PathVariable Long itemId, Model model) {
         ValidationItem item = itemRepository.findById(itemId);
         model.addAttribute("item", item);
-        return "validation/v3/editForm";
+        return "validation/v2/editForm";
     }
 
     @PostMapping("/{itemId}/edit")
     public String edit(@PathVariable Long itemId, @ModelAttribute ValidationItem item) {
         itemRepository.update(itemId, item);
-        return "redirect:/validation/v3/items/{itemId}";
+        return "redirect:/validation/v2/items/{itemId}";
     }
 
 }

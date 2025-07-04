@@ -1,4 +1,4 @@
-package com.spring.study.validation;
+package com.spring.study.validation.v1;
 
 import org.springframework.stereotype.Repository;
 
